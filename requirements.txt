@@ -2,3 +2,5 @@ fastapi~=0.111.1
 SQLAlchemy~=2.0.31
 starlette~=0.37.2
 pydantic~=2.8.2
+passlib~=1.7.4
+bcrypt~=4.0.1
