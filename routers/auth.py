@@ -1,4 +1,4 @@
-# import os
+import os
 from models import Users
 from starlette import status
 from typing import Annotated
@@ -16,8 +16,8 @@ router = APIRouter(
     tags=['auth']
 )
 
-SECRET_KEY = '861c6aa5c1766964f0469659b5f5f263c7c4ca44df9fa174efb5b0110d426e12'
-# SECRET_KEY = os.urandom(32).hex()   # for production
+# SECRET_KEY = '861c6aa5c1766964f0469659b5f5f263c7c4ca44df9fa174efb5b0110d426e12'
+SECRET_KEY = os.urandom(32).hex()   # for production
 ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
