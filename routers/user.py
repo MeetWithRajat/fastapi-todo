@@ -1,10 +1,9 @@
-from pydantic import BaseModel, Field
-
 from models import Users
 from starlette import status
 from typing import Annotated
-from sqlalchemy.orm import Session
 from database import SessionLocal
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
 from .auth import get_current_user, bcrypt_context
 from fastapi import APIRouter, Depends, HTTPException
 
