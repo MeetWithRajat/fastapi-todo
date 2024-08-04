@@ -16,8 +16,7 @@ router = APIRouter(
     tags=['auth']
 )
 
-# SECRET_KEY = '861c6aa5c1766964f0469659b5f5f263c7c4ca44df9fa174efb5b0110d426e12'
-SECRET_KEY = os.urandom(32).hex()   # for production
+SECRET_KEY = os.urandom(32).hex()
 ALGORITHM = 'HS256'
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -56,10 +55,11 @@ def authenticate_user(username: str, password: str, db):
     return user
 
 
-def create_access_token(username: str, user_id: int, expire_delta: timedelta):
+def create_access_token(username: str, user_id: int, role: str, expire_delta: timedelta):
     encode = {
         'sub': username,
         'id': user_id,
+        'role': role,
         'exp': datetime.now(timezone.utc) + expire_delta
     }
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -70,10 +70,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
         user_id: int = payload.get('id')
+        user_role: str = payload.get('role')
         if not username or not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate user')
 
-        return {'username': username, 'id': user_id}
+        return {'username': username, 'id': user_id, 'role': user_role}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate user')
 
@@ -97,7 +98,7 @@ async def create_user(db: db_dependency, user_request: UserRequest):
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if user:
-        token = create_access_token(user.username, user.id, timedelta(minutes=20))
+        token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
         return {"access_token": token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
